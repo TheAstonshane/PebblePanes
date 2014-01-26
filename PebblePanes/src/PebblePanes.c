@@ -1,16 +1,21 @@
+//PebblePanes: time code initially modified from Pebble SDK 2.0 source examples
+
+
+
 #include <pebble.h>
-//#include <string>
 
 static Window *window;
-static TextLayer *time_layer;
+static TextLayer *pane0_layer; //Pane 0 -- Time
+static TextLayer *pane1_layer; //Pane 1 -- variable
+static TextLayer *pane2_layer; //Pane 2 -- variable
+
+
 
 static void handle_second_tick(struct tm* tick_time, TimeUnits units_changed) {
 
   static char time_text[] = "00:00"; // Needs to be static because it's used by the system later.
-
-
   strftime(time_text, sizeof(time_text), "%I:%M", tick_time);
-  text_layer_set_text(time_layer, time_text);
+  text_layer_set_text(pane0_layer, time_text);
 }
 
 
@@ -28,29 +33,54 @@ static void click_config_provider(void *context) {
 
 static void window_load(Window *window) {
   Layer *window_layer = window_get_root_layer(window);
-  GRect bounds = layer_get_bounds(window_layer);
+ // GRect bounds = layer_get_bounds(window_layer);
 
-  // Init the text layer used to show the time
-  time_layer = text_layer_create((GRect) { .origin = { 0, 0 }, .size = { 144, 60 } });
-  text_layer_set_text_color(time_layer, GColorWhite);
-  text_layer_set_background_color(time_layer, GColorClear);
-  text_layer_set_text_alignment(time_layer, GTextAlignmentCenter);
-  text_layer_set_font(time_layer, fonts_get_system_font(FONT_KEY_BITHAM_42_LIGHT));
+  // Init pane0_layer
+    pane0_layer = text_layer_create((GRect) { .origin = { 0, 0 }, .size = { 144, 50 } });
+    text_layer_set_text_color(pane0_layer, GColorWhite);
+    text_layer_set_background_color(pane0_layer, GColorBlack);
+    text_layer_set_text_alignment(pane0_layer, GTextAlignmentCenter);
+    text_layer_set_font(pane0_layer, fonts_get_system_font(FONT_KEY_BITHAM_42_LIGHT));
 
-  // Ensures time is displayed immediately (will break if NULL tick event accessed).
-  // (This is why it's a good idea to have a separate routine to do the update itself.)
-  time_t now = time(NULL);
-  struct tm *current_time = localtime(&now);
-  handle_second_tick(current_time, SECOND_UNIT);
-  tick_timer_service_subscribe(SECOND_UNIT, &handle_second_tick);
+    // Ensures time is displayed immediately (will break if NULL tick event accessed).
+    // (This is why it's a good idea to have a separate routine to do the update itself.)
+    time_t now = time(NULL);
+    struct tm *current_time = localtime(&now);
+      // does text_layer_set_text above
+    handle_second_tick(current_time, SECOND_UNIT);
+    tick_timer_service_subscribe(SECOND_UNIT, &handle_second_tick);
 
-  layer_add_child(window_get_root_layer(window), text_layer_get_layer(time_layer));
+    layer_add_child(window_get_root_layer(window), text_layer_get_layer(pane0_layer));
+  
+  // Init pane1_layer
+    pane1_layer = text_layer_create((GRect) { .origin = { 0, 50 }, .size = { 144, 50 } });
+    text_layer_set_text(pane1_layer, "Test");
+    text_layer_set_text_alignment(pane1_layer, GTextAlignmentCenter);
+    text_layer_set_background_color(pane1_layer, GColorWhite);
+    text_layer_set_text_color(pane1_layer, GColorBlack);
+    text_layer_set_font(pane1_layer, fonts_get_system_font(FONT_KEY_BITHAM_42_LIGHT));
+    layer_add_child(window_layer, text_layer_get_layer(pane1_layer));
+
+// Init pane2_layer
+    pane2_layer = text_layer_create((GRect) { .origin = { 0, 100 }, .size = { 144, 50 } });
+    text_layer_set_text(pane2_layer, "Test");
+    text_layer_set_text_alignment(pane2_layer, GTextAlignmentCenter);
+    text_layer_set_background_color(pane2_layer, GColorBlack);
+    text_layer_set_text_color(pane2_layer, GColorWhite);
+    text_layer_set_font(pane2_layer, fonts_get_system_font(FONT_KEY_BITHAM_42_LIGHT));
+    layer_add_child(window_layer, text_layer_get_layer(pane2_layer));
+
+  
+ 
 
 }
 
 static void window_unload(Window *window) {
-  text_layer_destroy(time_layer);
+  text_layer_destroy(pane0_layer);
+  text_layer_destroy(pane1_layer);
+  text_layer_destroy(pane2_layer);
 }
+
 
 static void init(void) {
   window = window_create();

@@ -1,0 +1,17 @@
+{
+  "uuid": "fb92a50d-1fb6-484d-98e7-0b096f89efcd",
+  "shortName": "PebblePanes",
+  "longName": "PebblePanes",
+  "companyName": "TheAstonshane",
+  "versionCode": 1,
+  "versionLabel": "0.0.1",
+  "watchapp": {
+    "watchface": false
+  },
+  "appKeys": {
+    "dummy": 0
+  },
+  "resources": {
+    "media": []
+  }
+}

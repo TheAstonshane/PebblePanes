@@ -2,7 +2,6 @@
 //#include <string>
 
 static Window *window;
-static TextLayer *text_layer;
 static TextLayer *time_layer;
 
 static void handle_second_tick(struct tm* tick_time, TimeUnits units_changed) {
@@ -15,22 +14,11 @@ static void handle_second_tick(struct tm* tick_time, TimeUnits units_changed) {
 }
 
 
-static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
-  bool tmp = strcmp("Select",text_layer_get_text(text_layer));
-  if(tmp == 0){
-    text_layer_set_text(text_layer, "Press a button");
-  } else {
-    text_layer_set_text(text_layer, "Select");
-  }
-}
+static void select_click_handler(ClickRecognizerRef recognizer, void *context) {}
 
-static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
-  text_layer_set_text(text_layer, "Up");
-}
+static void up_click_handler(ClickRecognizerRef recognizer, void *context) {}
 
-static void down_click_handler(ClickRecognizerRef recognizer, void *context) {
-  text_layer_set_text(text_layer, "Down");
-}
+static void down_click_handler(ClickRecognizerRef recognizer, void *context) {}
 
 static void click_config_provider(void *context) {
   window_single_click_subscribe(BUTTON_ID_SELECT, select_click_handler);
@@ -42,16 +30,8 @@ static void window_load(Window *window) {
   Layer *window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_bounds(window_layer);
 
-  text_layer = text_layer_create((GRect) { .origin = { 0, 0 }, .size = { 144, 100 } });
-  text_layer_set_text(text_layer, "Press a button");
-  text_layer_set_text_alignment(text_layer, GTextAlignmentCenter);
-  text_layer_set_background_color(text_layer, GColorClear);
-  text_layer_set_text_color(text_layer, GColorWhite);
-  text_layer_set_font(text_layer, fonts_get_system_font(FONT_KEY_BITHAM_42_LIGHT));
-  layer_add_child(window_layer, text_layer_get_layer(text_layer));
-
   // Init the text layer used to show the time
-  time_layer = text_layer_create((GRect) { .origin = { 0, 100 }, .size = { 144, 68 } });
+  time_layer = text_layer_create((GRect) { .origin = { 0, 0 }, .size = { 144, 60 } });
   text_layer_set_text_color(time_layer, GColorWhite);
   text_layer_set_background_color(time_layer, GColorClear);
   text_layer_set_text_alignment(time_layer, GTextAlignmentCenter);
@@ -69,7 +49,6 @@ static void window_load(Window *window) {
 }
 
 static void window_unload(Window *window) {
-  text_layer_destroy(text_layer);
   text_layer_destroy(time_layer);
 }
 

@@ -12,6 +12,54 @@
     "dummy": 0
   },
   "resources": {
-    "media": []
+    "media": [
+      { "type": "png",
+        "name": "IMAGE_CLOUDY",
+        "file": "weather_icons/resized/clouds2.png"
+      },
+
+      { "type": "png",
+        "name": "IMAGE_HEAVY_RAIN",
+        "file": "weather_icons/resized/rain4.png"
+      },
+
+      { "type": "png",
+        "name": "IMAGE_LIGHT_RAIN",
+        "file": "weather_icons/resized/rain6.png"
+      },
+
+      { "type": "png",
+        "name": "IMAGE_SNOW",
+        "file": "weather_icons/resized/snow3.png"
+      },
+
+      { "type": "png",
+        "name": "IMAGE_LIGHTNING",
+        "file": "weather_icons/resized/dark20.png"
+      },
+      { "type": "png",
+        "name": "IMAGE_MOON",
+        "file": "weather_icons/resized/crescent6.png"
+      },
+
+      { "type": "png",
+        "name": "IMAGE_MOSTLY_CLOUDY_DAY",
+        "file": "weather_icons/resized/cloudy1.png"
+      },
+
+      { "type": "png",
+        "name": "IMAGE_MOSTLY_CLOUDY_NIGHT",
+        "file": "weather_icons/resized/crescent2.png"
+      },
+      { "type": "png",
+        "name": "IMAGE_SUN",
+        "file": "weather_icons/resized/clear3.png"
+      },
+
+      { "type": "png",
+        "name": "IMAGE_WIND",
+        "file": "weather_icons/resized/windy2.png"
+      }
+    ]
   }
 }

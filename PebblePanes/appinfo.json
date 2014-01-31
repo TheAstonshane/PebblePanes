@@ -5,6 +5,7 @@
   "companyName": "TheAstonshane",
   "versionCode": 1,
   "versionLabel": "0.0.1",
+  "capabilities": ["location"],
   "watchapp": {
     "watchface": false
   },
@@ -15,50 +16,52 @@
     "media": [
       { "type": "png",
         "name": "IMAGE_CLOUDY",
-        "file": "weather_icons/resized/clouds2.png"
+        "file": "weather_icons/resized/Cloud.png"
       },
 
       { "type": "png",
         "name": "IMAGE_HEAVY_RAIN",
-        "file": "weather_icons/resized/rain4.png"
+        "file": "weather_icons/resized/Raindrops.png"
       },
 
       { "type": "png",
         "name": "IMAGE_LIGHT_RAIN",
-        "file": "weather_icons/resized/rain6.png"
+        "file": "weather_icons/resized/Raindrop.png"
       },
 
       { "type": "png",
         "name": "IMAGE_SNOW",
-        "file": "weather_icons/resized/snow3.png"
+        "file": "weather_icons/resized/Cloud_Snow.png"
       },
 
       { "type": "png",
         "name": "IMAGE_LIGHTNING",
-        "file": "weather_icons/resized/dark20.png"
+        "file": "weather_icons/resized/Cloud_Lightning.png"
       },
+    
       { "type": "png",
-        "name": "IMAGE_MOON",
-        "file": "weather_icons/resized/crescent6.png"
+        "name": "IMAGE_MOSTLY_CLOUDY",
+        "file": "weather_icons/resized/Clouds.png"
       },
 
-      { "type": "png",
-        "name": "IMAGE_MOSTLY_CLOUDY_DAY",
-        "file": "weather_icons/resized/cloudy1.png"
-      },
-
-      { "type": "png",
-        "name": "IMAGE_MOSTLY_CLOUDY_NIGHT",
-        "file": "weather_icons/resized/crescent2.png"
-      },
       { "type": "png",
         "name": "IMAGE_SUN",
-        "file": "weather_icons/resized/clear3.png"
+        "file": "weather_icons/resized/Sun.png"
+      },
+
+      { "type": "png",
+        "name": "IMAGE_MOON",
+        "file": "weather_icons/resized/Moon_Stars.png"
       },
 
       { "type": "png",
         "name": "IMAGE_WIND",
-        "file": "weather_icons/resized/windy2.png"
+        "file": "weather_icons/resized/Air_Sock.png"
+      },
+
+      { "type": "png",
+        "name": "IMAGE_OTHER",
+        "file": "weather_icons/resized/Warning.png"
       }
     ]
   }

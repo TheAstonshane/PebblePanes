@@ -18,12 +18,11 @@ static const uint32_t WEATHER_ICONS[] = {
   RESOURCE_ID_IMAGE_LIGHT_RAIN,             //2
   RESOURCE_ID_IMAGE_SNOW,                   //3
   RESOURCE_ID_IMAGE_LIGHTNING,              //4
-  RESOURCE_ID_IMAGE_MOON,                   //5
-  RESOURCE_ID_IMAGE_MOSTLY_CLOUDY_DAY,      //6
-  RESOURCE_ID_IMAGE_MOSTLY_CLOUDY_NIGHT,    //7
-  RESOURCE_ID_IMAGE_SUN,                    //8
-  RESOURCE_ID_IMAGE_WIND,                   //9
-  //RESOURCE_ID_IMAGE_TEST                    //11
+  RESOURCE_ID_IMAGE_MOSTLY_CLOUDY,          //5
+  RESOURCE_ID_IMAGE_SUN,                    //6
+  RESOURCE_ID_IMAGE_MOON,                    //7
+  RESOURCE_ID_IMAGE_WIND,                   //8
+  RESOURCE_ID_IMAGE_OTHER                  //9
 };
 
 
@@ -81,11 +80,11 @@ static void window_load(Window *window) {
 
 
   //weather_icon_layer
-    weather_icon_layer = bitmap_layer_create((GRect) { .origin = { 0, 50 }, .size = { 75,55 } });
+    weather_icon_layer = bitmap_layer_create((GRect) { .origin = { 0, 50 }, .size = { 55,55 } });
     bitmap_layer_set_alignment(weather_icon_layer, GTextAlignmentLeft);
     layer_add_child(window_layer, bitmap_layer_get_layer(weather_icon_layer));
   
-    weather_icon_bitmap = gbitmap_create_with_resource(WEATHER_ICONS[1]);
+    weather_icon_bitmap = gbitmap_create_with_resource(WEATHER_ICONS[3]);
     bitmap_layer_set_bitmap(weather_icon_layer, weather_icon_bitmap);
 
 
@@ -93,8 +92,8 @@ static void window_load(Window *window) {
 
 
   // Init pane2_text_layer // new features will go here
-    pane2_text_layer = text_layer_create((GRect) { .origin = { 0, 105 }, .size = { 144, 168-55-50 } });
-    text_layer_set_text(pane2_text_layer, "Test");
+    pane2_text_layer = text_layer_create((GRect) { .origin = { 0, 105 }, .size = { 144, 168-50-55 } });
+    text_layer_set_text(pane2_text_layer, "");
     text_layer_set_text_alignment(pane2_text_layer, GTextAlignmentCenter);
     text_layer_set_background_color(pane2_text_layer, GColorBlack);
     text_layer_set_text_color(pane2_text_layer, GColorWhite);

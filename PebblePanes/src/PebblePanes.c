@@ -48,12 +48,43 @@ static void handle_second_tick(struct tm* tick_time, TimeUnits units_changed) {
   }
 }
 
+static void handle_minute_tick(struct tm* tick_time, TimeUnits units_changed) {
+
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "handle_minute_tick: setting time in pane0" );
+    //set pane0 - time
+    static char time_text[] = "00:00"; // Needs to be static because it's used by the system later.
+    strftime(time_text, sizeof(time_text), "%I:%M", tick_time);
+    text_layer_set_text(pane0_text_layer, time_text);
+}
+
+static void date_update(struct tm* tick_time, TimeUnits units_changed) {
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "date_update(): setting date in pane00" );
+
+  static char time_text2[] = "###  ### ##"; // Needs to be static because it's used by the system later.
+  strftime(time_text2, sizeof(time_text2), "%a %b %e", tick_time);
+  if(time_text2[7] == ' '){
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "resizing date in pane00 due to single-digit date" );
+    strftime(time_text2, sizeof(time_text2), "%a  %b %e", tick_time);
+   }
+  text_layer_set_text(pane00_text_layer, time_text2);
+}
+
 static void update_time(){
    // Ensures time is displayed immediately (will break if NULL tick event accessed).
+  //time_t now = time(NULL);
+  //struct tm *current_time = localtime(&now);
+ // handle_second_tick(current_time, SECOND_UNIT);      // does text_layer_set_text 
+  //tick_timer_service_subscribe(SECOND_UNIT, &handle_second_tick);
+
+  //Ensures time is displayed immediately (will break if NULL tick event accessed).
   time_t now = time(NULL);
   struct tm *current_time = localtime(&now);
-  handle_second_tick(current_time, SECOND_UNIT);      // does text_layer_set_text 
-  tick_timer_service_subscribe(SECOND_UNIT, &handle_second_tick);
+
+  date_update(current_time, DAY_UNIT);      // does text_layer_set_text 
+  tick_timer_service_subscribe(DAY_UNIT, &handle_second_tick);
+
+  handle_minute_tick(current_time, MINUTE_UNIT);      // does text_layer_set_text 
+  tick_timer_service_subscribe(MINUTE_UNIT, &handle_second_tick);
 }
 
 static void pane0_text_load(TextLayer *pane0_text_layer, Layer *window_layer) {

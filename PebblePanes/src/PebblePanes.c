@@ -29,10 +29,31 @@ static const uint32_t WEATHER_ICONS[] = {
 //end variable definitions
 
 static void handle_second_tick(struct tm* tick_time, TimeUnits units_changed) {
+   if(!layer_get_hidden((Layer*) pane0_text_layer)) {
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "setting time in pane0" );
+    //set pane0 - time
+    static char time_text[] = "00:00"; // Needs to be static because it's used by the system later.
+    strftime(time_text, sizeof(time_text), "%I:%M", tick_time);
+    text_layer_set_text(pane0_text_layer, time_text);
+  } else{
+      APP_LOG(APP_LOG_LEVEL_DEBUG, "setting date in pane00" );
+    //set pane00 - date
+    static char time_text2[] = "###  ### ##"; // Needs to be static because it's used by the system later.
+    strftime(time_text2, sizeof(time_text2), "%a %b %e", tick_time);
+    if(time_text2[7] == ' '){
+      APP_LOG(APP_LOG_LEVEL_DEBUG, "resizing date in pane00 due to single-digit date" );
+      strftime(time_text2, sizeof(time_text2), "%a  %b %e", tick_time);
+    }
+    text_layer_set_text(pane00_text_layer, time_text2);
+  }
+}
 
-  static char time_text[] = "00:00"; // Needs to be static because it's used by the system later.
-  strftime(time_text, sizeof(time_text), "%I:%M", tick_time);
-  text_layer_set_text(pane0_text_layer, time_text);
+static void update_time(){
+   // Ensures time is displayed immediately (will break if NULL tick event accessed).
+  time_t now = time(NULL);
+  struct tm *current_time = localtime(&now);
+  handle_second_tick(current_time, SECOND_UNIT);      // does text_layer_set_text 
+  tick_timer_service_subscribe(SECOND_UNIT, &handle_second_tick);
 }
 
 static void pane0_text_load(TextLayer *pane0_text_layer, Layer *window_layer) {
@@ -40,21 +61,15 @@ static void pane0_text_load(TextLayer *pane0_text_layer, Layer *window_layer) {
   text_layer_set_background_color(pane0_text_layer, GColorBlack);
   text_layer_set_text_alignment(pane0_text_layer, GTextAlignmentCenter);
   text_layer_set_font(pane0_text_layer, fonts_get_system_font(FONT_KEY_BITHAM_42_LIGHT));
-
-   // Ensures time is displayed immediately (will break if NULL tick event accessed).
-  time_t now = time(NULL);
-  struct tm *current_time = localtime(&now);
-  handle_second_tick(current_time, SECOND_UNIT);      // does text_layer_set_text 
-  tick_timer_service_subscribe(SECOND_UNIT, &handle_second_tick);
   layer_add_child(window_get_root_layer(window), text_layer_get_layer(pane0_text_layer));
 }
 
 static void pane00_text_load(TextLayer *pane00_text_layer, Layer *window_layer) {
-  text_layer_set_text(pane00_text_layer, "Test");
+  //text_layer_set_text(pane00_text_layer, "Test");
   text_layer_set_text_alignment(pane00_text_layer, GTextAlignmentCenter);
   text_layer_set_background_color(pane00_text_layer, GColorBlack);
   text_layer_set_text_color(pane00_text_layer, GColorWhite);
-  text_layer_set_font(pane00_text_layer, fonts_get_system_font(FONT_KEY_BITHAM_42_LIGHT));
+  text_layer_set_font(pane00_text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_28));
   layer_add_child(window_layer, text_layer_get_layer(pane00_text_layer));
 
   //we don't want this layer to show up all of the time, only once the up button has been pressed
@@ -122,6 +137,9 @@ static void window_load(Window *window) {
   // Init pane00_layer // TIME
     pane00_text_layer = text_layer_create((GRect) { .origin = { 0, 0 }, .size = { 144, 50 } });
     pane00_text_load(pane00_text_layer, window_layer);
+
+  //update time
+    update_time();
 
   // Init pane1_text_layer // this is the temperature layer for now...
     pane1_text_layer = text_layer_create((GRect) { .origin = { 0, 50 }, .size = { 144, 55 } });

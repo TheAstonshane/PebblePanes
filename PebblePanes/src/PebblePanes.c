@@ -6,6 +6,7 @@ static TextLayer *pane0_text_layer;
 static TextLayer *pane00_text_layer;
 static TextLayer *pane1_text_layer;
 static TextLayer *pane2_text_layer;
+static TextLayer *battery_layer;
 static BitmapLayer *icon_layer;
 static GBitmap *icon_bitmap = NULL;
 
@@ -72,6 +73,18 @@ static void update_weather(){
   send_cmd();
 }
 
+static void handle_battery() {
+  BatteryChargeState charge_state = battery_state_service_peek();
+  static char battery_text[] = "100% charged";
+
+  if (charge_state.is_charging) {
+    snprintf(battery_text, sizeof(battery_text), "charging");
+  } else {
+    snprintf(battery_text, sizeof(battery_text), "%d%% charged", charge_state.charge_percent);
+  }
+  text_layer_set_text(battery_layer, battery_text);
+}
+
 //Pane loading////////////////////////////////////////////////////////////////////////
 static void pane0_text_load(TextLayer *pane0_text_layer, Layer *window_layer) {
   //text_layer_set_text(pane0_text_layer, "tmp");
@@ -111,6 +124,19 @@ static void pane2_text_load(TextLayer *pane2_text_layer, Layer *window_layer) {
   layer_add_child(window_layer, text_layer_get_layer(pane2_text_layer));
 }
 
+static void battery_layer_load(TextLayer *battery_layer, Layer *window_layer) {
+  //text_layer_set_text(battery_layer, "n/a");
+  text_layer_set_text_alignment(battery_layer, GTextAlignmentCenter);
+  text_layer_set_background_color(battery_layer, GColorClear);
+  text_layer_set_text_color(battery_layer, GColorWhite);
+  text_layer_set_font(battery_layer, fonts_get_system_font(FONT_KEY_GOTHIC_28));
+  layer_add_child(window_layer, text_layer_get_layer(battery_layer));
+  handle_battery();
+
+  //we don't want this layer to show up all of the time, only once the up button has been pressed
+  layer_set_hidden((Layer*) battery_layer, true);
+}
+
 //updating of time / date stuff//////////////////////////////////////////////////////////
 static void handle_minute_tick(struct tm* tick_time, TimeUnits units_changed) {
 
@@ -119,11 +145,6 @@ static void handle_minute_tick(struct tm* tick_time, TimeUnits units_changed) {
     static char time_text[] = "00:00"; // Needs to be static because it's used by the system later.
     strftime(time_text, sizeof(time_text), "%l:%M", tick_time);
     text_layer_set_text(pane0_text_layer, time_text);
-}
-
-static void handle_hour_update(struct tm* tick_time, TimeUnits units_changed) {
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "hour_update(): updating weather automatically..." );
-  update_weather();
 }
 
 static void handle_date_update(struct tm* tick_time, TimeUnits units_changed) {
@@ -138,6 +159,8 @@ static void handle_date_update(struct tm* tick_time, TimeUnits units_changed) {
   text_layer_set_text(pane00_text_layer, time_text2);
 }
 
+
+
 static void update_time(){ 
   
   //Ensures time is displayed immediately (will break if NULL tick event accessed).
@@ -147,8 +170,8 @@ static void update_time(){
   handle_date_update(current_time, DAY_UNIT);      // does text_layer_set_text 
   tick_timer_service_subscribe(DAY_UNIT, &handle_date_update);
 
-  handle_hour_update(current_time, HOUR_UNIT);
-  tick_timer_service_subscribe(HOUR_UNIT, &handle_hour_update);
+  //battery_state_service_subscribe(&handle_battery);
+
 
   handle_minute_tick(current_time, MINUTE_UNIT);      // does text_layer_set_text 
   tick_timer_service_subscribe(MINUTE_UNIT, &handle_minute_tick);
@@ -159,6 +182,7 @@ static void update_time(){
 //click handlers////////////////////////////////////////////////////////////////////////
 static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
    update_weather();
+   handle_battery();
 }
 
 static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
@@ -173,7 +197,17 @@ static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
   }
 }
 
-static void down_click_handler(ClickRecognizerRef recognizer, void *context) {}
+static void down_click_handler(ClickRecognizerRef recognizer, void *context) {
+  if(!layer_get_hidden((Layer*) pane2_text_layer)) {
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "up click handler pressed, pane0_text_layer will now be hidden..." );
+    layer_set_hidden((Layer*) pane2_text_layer, true);
+    layer_set_hidden((Layer*) battery_layer, false);
+  }else{
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "up click handler pressed, pane0_text_layer will now be UN-hidden..." );
+    layer_set_hidden((Layer*) pane2_text_layer, false);
+    layer_set_hidden((Layer*) battery_layer, true);
+  }
+}
 
 static void click_config_provider(void *context) {
   window_single_click_subscribe(BUTTON_ID_SELECT, select_click_handler);
@@ -222,6 +256,9 @@ static void window_load(Window *window) {
   pane2_text_layer = text_layer_create(GRect(0, 105, 144, 168-50-55));
   pane2_text_load(pane2_text_layer, window_layer);
 
+  battery_layer = text_layer_create(GRect(0, 105, 144, 168-50-55));
+  battery_layer_load(battery_layer, window_layer);
+
   update_weather();
 }
 
@@ -231,7 +268,7 @@ static void window_unload(Window *window) {
   if (icon_bitmap) {
     gbitmap_destroy(icon_bitmap);
   }
-
+  text_layer_destroy(battery_layer);
   text_layer_destroy(pane2_text_layer);
   text_layer_destroy(pane1_text_layer);
   text_layer_destroy(pane00_text_layer);

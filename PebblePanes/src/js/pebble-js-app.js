@@ -38,26 +38,28 @@ function iconFromWeatherId(weatherId) {
 function fetchWeather(latitude, longitude) {
   var response;
   var req = new XMLHttpRequest();
-  req.open('GET', "http://api.openweathermap.org/data/2.5/forecast?" +
-    "lat=" + latitude + "&lon=" + longitude + "&cnt=1", true);
+  var tmp = "http://api.openweathermap.org/data/2.5/find?" + "lat=" + latitude + "&lon=" + longitude + "&cnt=2";
+  console.log(tmp);
+  req.open('GET', tmp, true);
   req.onload = function(e) {
     if (req.readyState == 4) {
       if(req.status == 200) {
         console.log(req.responseText);
         response = JSON.parse(req.responseText);
-        var temperature, icon, type;
+        var temperature, icon, city;
         if (response && response.list && response.list.length > 0) {
           var weatherResult = response.list[0];
+          //temperature = Math.round(weatherResult.main.temp - 273.15);
           temperature = Math.round((weatherResult.main.temp - 273.15)*1.8 + 32);
           icon = iconFromWeatherId(weatherResult.weather[0].id);
-          //type = weatherResult.name;
+          city = weatherResult.name;
           type = weatherResult.weather[0].main;
           console.log(temperature);
           console.log(icon);
+          console.log(city);
           console.log(type);
           Pebble.sendAppMessage({
             "icon":icon,
-            //"temperature":temperature + "\u00B0F",
             "temperature":temperature + "\u00B0",
             "type":type});
         }

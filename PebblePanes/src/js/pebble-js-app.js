@@ -125,7 +125,7 @@ Pebble.addEventListener("webviewclosed",
 
 Pebble.addEventListener("showConfiguration", function() {
   console.log("showing configuration");
-  Pebble.openURL('http://www.google.com');
+  Pebble.openURL('https://dl.dropboxusercontent.com/u/8174738/configurable.html');
 });
 
 Pebble.addEventListener("webviewclosed", function(e) {

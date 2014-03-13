@@ -1,5 +1,5 @@
 
-function iconFromWeatherId(weatherId) {
+function iconFromWeatherId(weatherId, iconId) {
   if (weatherId == 801 || weatherId == 802) {
     return 0; // cloudy
 
@@ -38,7 +38,8 @@ function iconFromWeatherId(weatherId) {
 function fetchWeather(latitude, longitude) {
   var response;
   var req = new XMLHttpRequest();
-  var tmp = "http://api.openweathermap.org/data/2.5/find?" + "lat=" + latitude + "&lon=" + longitude + "&cnt=2";
+  var tmp = "http://api.openweathermap.org/data/2.5/weather?" + "lat=" + latitude
+                                                           + "&lon=" + longitude;
   console.log(tmp);
   req.open('GET', tmp, true);
   req.onload = function(e) {
@@ -46,23 +47,31 @@ function fetchWeather(latitude, longitude) {
       if(req.status == 200) {
         console.log(req.responseText);
         response = JSON.parse(req.responseText);
-        var temperature, icon, city;
-        if (response && response.list && response.list.length > 0) {
-          var weatherResult = response.list[0];
-          //temperature = Math.round(weatherResult.main.temp - 273.15);
-          temperature = Math.round((weatherResult.main.temp - 273.15)*1.8 + 32);
-          icon = iconFromWeatherId(weatherResult.weather[0].id);
-          city = weatherResult.name;
-          type = weatherResult.weather[0].main;
-          console.log(temperature);
-          console.log(icon);
-          console.log(city);
-          console.log(type);
-          Pebble.sendAppMessage({
+        
+        var city = response.name;
+        console.log("city:");
+        console.log(city);
+
+        var main = response.main;
+        var weather = response.weather[0];
+
+        var temperature = Math.round((main.temp - 273.15)*1.8 + 32);
+        console.log("temperature:");
+        console.log(temperature);
+
+        var type = weather.main;
+        console.log("type:");
+        console.log(type);
+
+        var icon = iconFromWeatherId(weather.id, weather.icon);
+        console.log("icon:");
+        console.log(icon);
+
+        Pebble.sendAppMessage({
             "icon":icon,
             "temperature":temperature + "\u00B0",
-            "type":type});
-        }
+            "type":type
+        });
 
       } else {
         console.log("Error");
@@ -71,6 +80,7 @@ function fetchWeather(latitude, longitude) {
   }
   req.send(null);
 }
+
 
 function locationSuccess(pos) {
   var coordinates = pos.coords;
@@ -86,28 +96,41 @@ function locationError(err) {
 }
 
 var locationOptions = { "timeout": 15000, "maximumAge": 60000 }; 
+var initialized = false;
 
 
 Pebble.addEventListener("ready",
-                        function(e) {
-                          console.log("connect!" + e.ready);
-                          locationWatcher = window.navigator.geolocation.watchPosition(locationSuccess, locationError, locationOptions);
-                          console.log(e.type);
-                        });
+  function(e) {
+    console.log("connect!" + e.ready);
+    locationWatcher = window.navigator.geolocation.watchPosition(locationSuccess, locationError, locationOptions);
+    console.log(e.type);
+    initialized = true;
+  });
 
 Pebble.addEventListener("appmessage",
-                        function(e) {
-                          window.navigator.geolocation.getCurrentPosition(locationSuccess, locationError, locationOptions);
-                          console.log(e.type);
-                          console.log(e.payload.temperature);
-                          console.log("message!");
-                        });
+  function(e) {
+    window.navigator.geolocation.getCurrentPosition(locationSuccess, locationError, locationOptions);
+    console.log(e.type);
+    console.log(e.payload.temperature);
+    console.log("message!");
+});
 
 Pebble.addEventListener("webviewclosed",
-                                     function(e) {
-                                     console.log("webview closed");
-                                     console.log(e.type);
-                                     console.log(e.response);
-                                     });
+  function(e) {
+    console.log("webview closed");
+    console.log(e.type);
+    console.log(e.response);
+});
 
 
+Pebble.addEventListener("showConfiguration", function() {
+  console.log("showing configuration");
+  Pebble.openURL('http://assets.getpebble.com.s3-website-us-east-1.amazonaws.com/pebble-js/configurable.html');
+});
+
+Pebble.addEventListener("webviewclosed", function(e) {
+  console.log("configuration closed");
+  // webview closed
+  var options = JSON.parse(decodeURIComponent(e.response));
+  console.log("Options = " + JSON.stringify(options));
+});

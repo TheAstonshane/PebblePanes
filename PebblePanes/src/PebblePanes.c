@@ -143,7 +143,11 @@ static void handle_minute_tick(struct tm* tick_time, TimeUnits units_changed) {
     APP_LOG(APP_LOG_LEVEL_DEBUG, "handle_minute_tick: setting time in pane0" );
     //set pane0 - time
     static char time_text[] = "00:00"; // Needs to be static because it's used by the system later.
-    strftime(time_text, sizeof(time_text), "%l:%M", tick_time);
+    if(clock_is_24h_style()){
+      strftime(time_text, sizeof(time_text), "%H:%M", tick_time);
+    }else{
+      strftime(time_text, sizeof(time_text), "%l:%M", tick_time);
+    }
     text_layer_set_text(pane0_text_layer, time_text);
 }
 

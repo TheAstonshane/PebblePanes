@@ -5,7 +5,7 @@
   "companyName": "TheAstonshane",
   "versionCode": 2,
   "versionLabel": "0.1.0",
-  "capabilities": ["location"],
+  "capabilities": ["location", "configurable"],
   "watchapp": {
     "watchface": false
   },

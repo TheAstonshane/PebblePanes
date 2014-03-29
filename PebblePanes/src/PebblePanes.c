@@ -1,5 +1,6 @@
 #include "pebble.h"
-
+////////////////////////////////////////////////////////////////////////////////////
+//global definitions
 static Window *window;
 
 static TextLayer *time_text_layer;
@@ -7,6 +8,7 @@ static TextLayer *date_text_layer;
 static TextLayer *temp_text_layer;
 static TextLayer *weather_text_layer;
 static TextLayer *battery_layer;
+
 static BitmapLayer *icon_layer;
 static GBitmap *icon_bitmap = NULL;
 
@@ -32,6 +34,9 @@ static const uint32_t WEATHER_ICONS[] = {
   RESOURCE_ID_IMAGE_OTHER                  //9
 };
 
+static bool startup = true;
+////////////////////////////////////////////////////////////////////////////////////
+//data sync...
 static void send_cmd(void);
 
 static void sync_error_callback(DictionaryResult dict_error, AppMessageResult app_message_error, void *context) {
@@ -59,7 +64,8 @@ static void sync_tuple_changed_callback(const uint32_t key, const Tuple* new_tup
   }
 }
 
-////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+//updateing battery, weather...
 static void update_weather(){
    Tuplet initial_values[] = {
     TupletInteger(WEATHER_ICON_KEY, (uint8_t) 1),
@@ -96,7 +102,7 @@ static void time_text_load(TextLayer *time_text_layer, Layer *window_layer) {
 }
 
 static void date_text_load(TextLayer *date_text_layer, Layer *window_layer) {
-  //text_layer_set_text(date_text_layer, "Test");
+  text_layer_set_text(date_text_layer, "X");
   text_layer_set_text_alignment(date_text_layer, GTextAlignmentCenter);
   text_layer_set_background_color(date_text_layer, GColorClear);
   text_layer_set_text_color(date_text_layer, GColorWhite);
@@ -137,6 +143,18 @@ static void battery_layer_load(TextLayer *battery_layer, Layer *window_layer) {
   layer_set_hidden((Layer*) battery_layer, true);
 }
 
+static void update_date(struct tm* tick_time, TimeUnits units_changed) {
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "update_date(): setting date in date_text_layer" );
+
+  static char time_text2[] = "###  ### ##"; // Needs to be static because it's used by the system later.
+  strftime(time_text2, sizeof(time_text2), "%a %b %e", tick_time);
+  if(time_text2[7] == ' '){
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "resizing date in date_text_layer due to single-digit date" );
+    strftime(time_text2, sizeof(time_text2), "%a  %b %e", tick_time);
+   }
+  text_layer_set_text(date_text_layer, time_text2);
+}
+
 //updating of time / date stuff//////////////////////////////////////////////////////////
 static void handle_minute_tick(struct tm* tick_time, TimeUnits units_changed) {
 
@@ -149,18 +167,36 @@ static void handle_minute_tick(struct tm* tick_time, TimeUnits units_changed) {
       strftime(time_text, sizeof(time_text), "%l:%M", tick_time);
     }
     text_layer_set_text(time_text_layer, time_text);
-}
 
-static void handle_date_update(struct tm* tick_time, TimeUnits units_changed) {
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "date_update(): setting date in date_text_layer" );
+    //check ot see if we should update date / weather
+    char tmp_text[] = "99";
+    strftime(tmp_text, sizeof(tmp_text), "%M", tick_time);
+    char tmp_text2[] = "99";
+    strftime(tmp_text2, sizeof(tmp_text2), "%l", tick_time);
 
-  static char time_text2[] = "###  ### ##"; // Needs to be static because it's used by the system later.
-  strftime(time_text2, sizeof(time_text2), "%a %b %e", tick_time);
-  if(time_text2[7] == ' '){
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "resizing date in date_text_layer due to single-digit date" );
-    strftime(time_text2, sizeof(time_text2), "%a  %b %e", tick_time);
+    //update weather every 30 minutes
+    if(atoi(tmp_text) == 0 || atoi(tmp_text) == 30){
+      APP_LOG(APP_LOG_LEVEL_DEBUG, "handle_minute_tick: calling update_weather()" );
+      update_weather();
+    }
+     //update date / battery at 12:00, twice a day
+    if( (atoi(tmp_text) == 0 && atoi(tmp_text2) == 12)) {
+      //startup = false;
+
+      APP_LOG(APP_LOG_LEVEL_DEBUG, "handle_minute_tick: updating date and battery" );
+      update_date(tick_time, units_changed);
+      handle_battery();
+    }
+   //APP_LOG(APP_LOG_LEVEL_DEBUG, sizeof(text_layer_get_text(date_text_layer)) );
+    //make sure to set date / battery layers on startup
+   if(startup){
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "startup == true" );
+    update_date(tick_time, units_changed);
+    startup = false;
    }
-  text_layer_set_text(date_text_layer, time_text2);
+
+
+
 }
 
 
@@ -171,13 +207,7 @@ static void update_time(){
   time_t now = time(NULL);
   struct tm *current_time = localtime(&now);
 
-  handle_date_update(current_time, DAY_UNIT);      // does text_layer_set_text 
-  tick_timer_service_subscribe(DAY_UNIT, &handle_date_update);
-
-  //battery_state_service_subscribe(&handle_battery);
-
-
-  handle_minute_tick(current_time, MINUTE_UNIT);      // does text_layer_set_text 
+  handle_minute_tick(current_time, MINUTE_UNIT);      // updates time
   tick_timer_service_subscribe(MINUTE_UNIT, &handle_minute_tick);
 }
 ////////////////////////////////////////////////////////////////////////////////////////

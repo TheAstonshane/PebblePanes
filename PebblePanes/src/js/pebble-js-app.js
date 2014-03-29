@@ -95,6 +95,21 @@ function locationError(err) {
   });
 }
 
+function calendar_data () {
+  //
+   var response;
+  var req = new XMLHttpRequest();
+  var tmp = "https://www.googleapis.com/calendar/v3/calendars/61ftist2f2sismvf4hh5uh2pdc%40group.calendar.google.com/events?key={AIzaSyCJ9u0anGIDIsfPK4yEK7W08ivk4CjCvKs}"
+  console.log(tmp);
+  req.open('GET', tmp, true);
+  console.log(req.responseText);
+  req.onload = function(e) {
+    console.log("########");
+    console.log(req.response);
+    console.log("########");
+  }
+}
+
 var locationOptions = { "timeout": 15000, "maximumAge": 60000 }; 
 var initialized = false;
 
@@ -104,6 +119,7 @@ Pebble.addEventListener("ready",
     console.log("connect!" + e.ready);
     locationWatcher = window.navigator.geolocation.watchPosition(locationSuccess, locationError, locationOptions);
     console.log(e.type);
+    calendar_data();
     initialized = true;
   });
 

@@ -9,6 +9,10 @@ static TextLayer *temp_text_layer;
 static TextLayer *weather_text_layer;
 static TextLayer *battery_layer;
 
+static TextLayer *calendar_event_text_layer;
+static TextLayer *calendar_location_text_layer;
+static TextLayer *calendar_time_text_layer;
+
 static BitmapLayer *icon_layer;
 static GBitmap *icon_bitmap = NULL;
 
@@ -143,6 +147,34 @@ static void battery_layer_load(TextLayer *battery_layer, Layer *window_layer) {
   layer_set_hidden((Layer*) battery_layer, true);
 }
 
+static void calendar_layers_load(TextLayer *calendar_event_text_layer, TextLayer *calendar_location_text_layer,
+                                   TextLayer *calendar_time_text_layer, Layer *window_layer){
+  
+  text_layer_set_text(calendar_event_text_layer, "event");
+  text_layer_set_text_alignment(calendar_event_text_layer, GTextAlignmentLeft);
+  text_layer_set_background_color(calendar_event_text_layer, GColorClear);
+  text_layer_set_text_color(calendar_event_text_layer, GColorWhite);
+  text_layer_set_font(calendar_event_text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_14));
+  layer_add_child(window_layer, text_layer_get_layer(calendar_event_text_layer));
+   layer_set_hidden((Layer*) calendar_event_text_layer, true);
+
+  text_layer_set_text(calendar_location_text_layer, "location location location");
+  text_layer_set_text_alignment(calendar_location_text_layer, GTextAlignmentLeft);
+  text_layer_set_background_color(calendar_location_text_layer, GColorClear);
+  text_layer_set_text_color(calendar_location_text_layer, GColorWhite);
+  text_layer_set_font(calendar_location_text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_14));
+  layer_add_child(window_layer, text_layer_get_layer(calendar_location_text_layer));
+   layer_set_hidden((Layer*) calendar_location_text_layer, true);
+
+  text_layer_set_text(calendar_time_text_layer, "time");
+  text_layer_set_text_alignment(calendar_time_text_layer, GTextAlignmentLeft);
+  text_layer_set_background_color(calendar_time_text_layer, GColorClear);
+  text_layer_set_text_color(calendar_time_text_layer, GColorWhite);
+  text_layer_set_font(calendar_time_text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_14));
+  layer_add_child(window_layer, text_layer_get_layer(calendar_time_text_layer));
+   layer_set_hidden((Layer*) calendar_time_text_layer, true);
+}
+
 static void update_date(struct tm* tick_time, TimeUnits units_changed) {
   APP_LOG(APP_LOG_LEVEL_DEBUG, "update_date(): setting date in date_text_layer" );
 
@@ -232,15 +264,34 @@ static void up_click_handler(ClickRecognizerRef recognizer, void *context) {
 }
 
 static void down_click_handler(ClickRecognizerRef recognizer, void *context) {
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "down_click_handler " );
+  
+  //if the weather_description is currently vissible, display battery info
   if(!layer_get_hidden((Layer*) weather_text_layer)) {
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "down_click_handler click handler pressed, weather_text_layer will now be hidden..." );
+    layer_set_hidden((Layer*) weather_text_layer, true);
+    layer_set_hidden((Layer*) battery_layer, false);
+  //else if battery is currently visible, display calendar
+  }else if(!layer_get_hidden((Layer*) battery_layer)){
+    layer_set_hidden((Layer*) battery_layer, true);
+    layer_set_hidden((Layer*) calendar_event_text_layer, false);
+    layer_set_hidden((Layer*) calendar_location_text_layer, false);
+    layer_set_hidden((Layer*) calendar_time_text_layer, false);
+  //else, show weather again
+  }else{
+    layer_set_hidden((Layer*) weather_text_layer, false);
+    layer_set_hidden((Layer*) calendar_event_text_layer, true);
+    layer_set_hidden((Layer*) calendar_location_text_layer, true);
+    layer_set_hidden((Layer*) calendar_time_text_layer, true);
+  }
+
+
+  /*if(!layer_get_hidden((Layer*) weather_text_layer)) { 
     layer_set_hidden((Layer*) weather_text_layer, true);
     layer_set_hidden((Layer*) battery_layer, false);
   }else{
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "down_click_handler click handler pressed, weather_text_layer will now be UN-hidden..." );
     layer_set_hidden((Layer*) weather_text_layer, false);
     layer_set_hidden((Layer*) battery_layer, true);
-  }
+  }*/
 }
 
 static void click_config_provider(void *context) {
@@ -294,6 +345,11 @@ static void window_load(Window *window) {
   battery_layer_load(battery_layer, window_layer);
 
   update_weather();
+
+  calendar_event_text_layer = text_layer_create(GRect(0, 105, 144, 21));
+  calendar_location_text_layer = text_layer_create(GRect(0, 126, 144, 21));
+  calendar_time_text_layer = text_layer_create(GRect(0, 147, 144, 21));
+  calendar_layers_load(calendar_event_text_layer, calendar_location_text_layer, calendar_time_text_layer, window_layer);
 }
 
 static void window_unload(Window *window) {
@@ -302,6 +358,9 @@ static void window_unload(Window *window) {
   if (icon_bitmap) {
     gbitmap_destroy(icon_bitmap);
   }
+  text_layer_destroy(calendar_time_text_layer);
+  text_layer_destroy(calendar_location_text_layer);
+  text_layer_destroy(calendar_event_text_layer);
   text_layer_destroy(battery_layer);
   text_layer_destroy(weather_text_layer);
   text_layer_destroy(temp_text_layer);

@@ -97,10 +97,11 @@ function locationError(err) {
 
 function calendar_data () {
   //
+  var apiKey = 'AIzaSyCJ9u0anGIDIsfPK4yEK7W08ivk4CjCvKs';
    var response;
   var req = new XMLHttpRequest();
-  var tmp = "https://www.googleapis.com/calendar/v3/calendars/61ftist2f2sismvf4hh5uh2pdc%40group.calendar.google.com/events?key={AIzaSyCJ9u0anGIDIsfPK4yEK7W08ivk4CjCvKs}"
-  console.log(tmp);
+  var tmp = "https://www.googleapis.com/calendar/v3/users/me/calendarList?key={AIzaSyCJ9u0anGIDIsfPK4yEK7W08ivk4CjCvKs}";
+  //console.log(tmp);
   req.open('GET', tmp, true);
   console.log(req.responseText);
   req.onload = function(e) {

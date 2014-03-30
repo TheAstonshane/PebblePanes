@@ -10,7 +10,10 @@
     "watchface": false
   },
  "appKeys": {
-    "type": 2,
+   "time": 5,
+   "location": 4,
+   "event": 3,
+   "type": 2,
     "temperature": 1,
     "icon": 0
   },

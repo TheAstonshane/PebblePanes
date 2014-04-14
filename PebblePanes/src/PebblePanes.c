@@ -13,6 +13,9 @@ static TextLayer *calendar_event_text_layer;
 static TextLayer *calendar_location_text_layer;
 static TextLayer *calendar_time_text_layer;
 
+static TextLayer *sports_teams_text_layer;
+static TextLayer *sports_score_text_layer;
+
 static BitmapLayer *icon_layer;
 static GBitmap *icon_bitmap = NULL;
 
@@ -178,6 +181,25 @@ static void calendar_layers_load(TextLayer *calendar_event_text_layer, TextLayer
    layer_set_hidden((Layer*) calendar_time_text_layer, true);
 }
 
+static void sports_layers_load(TextLayer *sports_teams_text_layer, TextLayer *sports_score_text_layer, Layer *window_layer){
+  text_layer_set_text(sports_teams_text_layer, "event");
+  text_layer_set_text_alignment(sports_teams_text_layer, GTextAlignmentLeft);
+  text_layer_set_background_color(sports_teams_text_layer, GColorClear);
+  text_layer_set_text_color(sports_teams_text_layer, GColorWhite);
+  text_layer_set_font(sports_teams_text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_14));
+  layer_add_child(window_layer, text_layer_get_layer(sports_teams_text_layer));
+  layer_set_hidden((Layer*) sports_teams_text_layer, true);
+
+  text_layer_set_text(sports_score_text_layer, "event");
+  text_layer_set_text_alignment(sports_score_text_layer, GTextAlignmentLeft);
+  text_layer_set_background_color(sports_score_text_layer, GColorClear);
+  text_layer_set_text_color(sports_score_text_layer, GColorWhite);
+  text_layer_set_font(sports_score_text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_14));
+  layer_add_child(window_layer, text_layer_get_layer(sports_score_text_layer));
+  layer_set_hidden((Layer*) sports_score_text_layer, true);
+  
+}
+
 static void update_date(struct tm* tick_time, TimeUnits units_changed) {
   APP_LOG(APP_LOG_LEVEL_DEBUG, "update_date(): setting date in date_text_layer" );
 
@@ -279,22 +301,21 @@ static void down_click_handler(ClickRecognizerRef recognizer, void *context) {
     layer_set_hidden((Layer*) calendar_event_text_layer, false);
     layer_set_hidden((Layer*) calendar_location_text_layer, false);
     layer_set_hidden((Layer*) calendar_time_text_layer, false);
-  //else, show weather again
-  }else{
-    layer_set_hidden((Layer*) weather_text_layer, false);
+  //else if the calendar is visible, show the sports scores
+  }else if(!layer_get_hidden((Layer*) calendar_event_text_layer)){
+    layer_set_hidden((Layer*) sports_teams_text_layer, false);
+    layer_set_hidden((Layer*) sports_score_text_layer, false);
     layer_set_hidden((Layer*) calendar_event_text_layer, true);
     layer_set_hidden((Layer*) calendar_location_text_layer, true);
     layer_set_hidden((Layer*) calendar_time_text_layer, true);
   }
-
-
-  /*if(!layer_get_hidden((Layer*) weather_text_layer)) { 
-    layer_set_hidden((Layer*) weather_text_layer, true);
-    layer_set_hidden((Layer*) battery_layer, false);
-  }else{
+  //else, show weather again
+  else{
     layer_set_hidden((Layer*) weather_text_layer, false);
-    layer_set_hidden((Layer*) battery_layer, true);
-  }*/
+    layer_set_hidden((Layer*) sports_teams_text_layer, true);
+    layer_set_hidden((Layer*) sports_score_text_layer, true);
+  }
+
 }
 
 static void click_config_provider(void *context) {
@@ -353,6 +374,11 @@ static void window_load(Window *window) {
   calendar_location_text_layer = text_layer_create(GRect(0, 126, 144, 21));
   calendar_time_text_layer = text_layer_create(GRect(0, 147, 144, 21));
   calendar_layers_load(calendar_event_text_layer, calendar_location_text_layer, calendar_time_text_layer, window_layer);
+
+  sports_teams_text_layer = text_layer_create(GRect(0, 105, 144, 21));
+  sports_score_text_layer = text_layer_create(GRect(0, 126, 144, 21));
+  //calendar_time_text_layer = text_layer_create(GRect(0, 147, 144, 21));
+  sports_layers_load(sports_teams_text_layer, sports_score_text_layer, window_layer);
 }
 
 static void window_unload(Window *window) {
@@ -361,6 +387,8 @@ static void window_unload(Window *window) {
   if (icon_bitmap) {
     gbitmap_destroy(icon_bitmap);
   }
+  text_layer_destroy(sports_teams_text_layer);
+  text_layer_destroy(sports_score_text_layer);
   text_layer_destroy(calendar_time_text_layer);
   text_layer_destroy(calendar_location_text_layer);
   text_layer_destroy(calendar_event_text_layer);

@@ -97,6 +97,7 @@ function locationError(err) {
 
 function calendar_data () {
   //
+  /*
   var apiKey = 'AIzaSyCJ9u0anGIDIsfPK4yEK7W08ivk4CjCvKs';
    var response;
   var req = new XMLHttpRequest();
@@ -109,6 +110,33 @@ function calendar_data () {
     console.log(req.response);
     console.log("########");
   }
+  */
+}
+
+function sports_data(){
+  var api_key = "rag9j4ff6nwzwcr589ehg36g";
+  var access_level = "t";
+  var version = "4";
+  var year = "2014";
+  var month = "04";
+  var day = "13";
+  //var url = "http://api.sportsdatallc.org/mlb-" + access_level + version + "/daily/schedule/" + year + "/" + month + "/" + day + ".xml?api_key=" + api_key;
+  //var url = "http://www.w3schools.com/xml/note.xml";
+
+
+
+  var req = new XMLHttpRequest();
+  var url = "http://sports.espn.go.com/mlb/bottomline/scores";
+  console.log(url);
+  req.open('GET', url, true);
+ 
+  req.onload = function(e) {
+    console.log("sports");
+    console.log(req.responseText);
+
+  }
+  req.send(null);
+  //console.log(req.responseText);
 }
 
 var locationOptions = { "timeout": 15000, "maximumAge": 60000 }; 
@@ -121,6 +149,7 @@ Pebble.addEventListener("ready",
     locationWatcher = window.navigator.geolocation.watchPosition(locationSuccess, locationError, locationOptions);
     console.log(e.type);
     calendar_data();
+    sports_data();
     initialized = true;
   });
 

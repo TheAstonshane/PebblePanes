@@ -114,29 +114,54 @@ function calendar_data () {
 }
 
 function sports_data(){
-  var api_key = "rag9j4ff6nwzwcr589ehg36g";
-  var access_level = "t";
-  var version = "4";
-  var year = "2014";
-  var month = "04";
-  var day = "13";
-  //var url = "http://api.sportsdatallc.org/mlb-" + access_level + version + "/daily/schedule/" + year + "/" + month + "/" + day + ".xml?api_key=" + api_key;
-  //var url = "http://www.w3schools.com/xml/note.xml";
+
+  var api = "y5xxzn9dk7c97ttsuxxh5gcb";
 
 
 
   var req = new XMLHttpRequest();
   var url = "http://sports.espn.go.com/mlb/bottomline/scores";
+  
   console.log(url);
-  req.open('GET', url, true);
+  req.open('GET', url);
  
   req.onload = function(e) {
-    console.log("sports");
-    console.log(req.responseText);
+    console.log("<sports>");
+    //console.log(req.responseText);
+    var full = req.responseText;
+    full = full.split("?");
+    for(i=0; i<full.length; i++){
+      var line = full[i];
+      //console.log(line);
+      line = line.split("&");
+      for(j=0; j<line.length; j++){
+        var bit = line[j];
+        var tmp = "";
+        while(bit != tmp){
+          tmp = bit;
+          bit = bit.replace("%20"," ");
+        }
+        tmp = "";
+        while(bit != tmp){
+          tmp = bit;
+          bit = bit.replace("  ", " ");
+        }
 
+        var piece = bit.split("=");
+        if(piece[0].search("left") == -1){
+          continue;
+        }else{
+          console.log(piece[1]);
+        }
+
+       // console.log(bit);
+
+      }
+      console.log("");
+    }
+    console.log("<sports/>");
   }
   req.send(null);
-  //console.log(req.responseText);
 }
 
 var locationOptions = { "timeout": 15000, "maximumAge": 60000 }; 

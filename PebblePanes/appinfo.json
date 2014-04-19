@@ -10,9 +10,12 @@
     "watchface": false
   },
  "appKeys": {
-   "time": 5,
-   "location": 4,
-   "event": 3,
+   "sports_time": 8,
+   "sports_team2": 7,
+   "sports_team1": 6,
+   "calendar_time": 5,
+   "calendar_location": 4,
+   "calendar_event": 3,
    "type": 2,
     "temperature": 1,
     "icon": 0

@@ -13,8 +13,9 @@ static TextLayer *calendar_event_text_layer;
 static TextLayer *calendar_location_text_layer;
 static TextLayer *calendar_time_text_layer;
 
-static TextLayer *sports_teams_text_layer;
-static TextLayer *sports_score_text_layer;
+static TextLayer *sports_team1_text_layer;
+static TextLayer *sports_team2_text_layer;
+static TextLayer *sports_time_text_layer;
 
 static BitmapLayer *icon_layer;
 static GBitmap *icon_bitmap = NULL;
@@ -29,6 +30,9 @@ enum WeatherKey {
   CALENDAR_EVENT_KEY = 0x3,       // TUPLE_CSTRING
   CALENDAR_LOCATION_KEY = 0x4,    // TUPLE_CSTRING
   CALENDAR_TIME_KEY = 0x5,        // TUPLE_CSTRING
+  SPORTS_TEAM1_KEY = 0x6,
+  SPORTS_TEAM2_KEY = 0x7,
+  SPORTS_TIME_KEY = 0x8,
 };
 
 static const uint32_t WEATHER_ICONS[] = {
@@ -71,6 +75,16 @@ static void sync_tuple_changed_callback(const uint32_t key, const Tuple* new_tup
     case WEATHER_TYPE_KEY:
       text_layer_set_text(weather_text_layer, new_tuple->value->cstring);
       break;
+    case SPORTS_TEAM1_KEY:
+      text_layer_set_text(sports_team1_text_layer, new_tuple->value->cstring);
+      break;
+    case SPORTS_TEAM2_KEY:
+      text_layer_set_text(sports_team2_text_layer, new_tuple->value->cstring);
+      break;
+    case SPORTS_TIME_KEY:
+      text_layer_set_text(sports_time_text_layer, new_tuple->value->cstring);
+      break;
+
   }
 }
 
@@ -81,6 +95,19 @@ static void update_weather(){
     TupletInteger(WEATHER_ICON_KEY, (uint8_t) 1),
     TupletCString(WEATHER_TEMPERATURE_KEY, "n/a"),
     TupletCString(WEATHER_TYPE_KEY, "n/a"),
+  };
+
+   app_sync_init(&sync, sync_buffer, sizeof(sync_buffer), initial_values, ARRAY_LENGTH(initial_values),
+      sync_tuple_changed_callback, sync_error_callback, NULL);
+
+  send_cmd();
+}
+
+static void update_sports(){
+   Tuplet initial_values[] = {
+    TupletCString(SPORTS_TEAM1_KEY, "team1"),
+    TupletCString(SPORTS_TEAM2_KEY, "team2"),
+    TupletCString(SPORTS_TIME_KEY, "time"),
   };
 
    app_sync_init(&sync, sync_buffer, sizeof(sync_buffer), initial_values, ARRAY_LENGTH(initial_values),
@@ -181,22 +208,30 @@ static void calendar_layers_load(TextLayer *calendar_event_text_layer, TextLayer
    layer_set_hidden((Layer*) calendar_time_text_layer, true);
 }
 
-static void sports_layers_load(TextLayer *sports_teams_text_layer, TextLayer *sports_score_text_layer, Layer *window_layer){
-  text_layer_set_text(sports_teams_text_layer, "event");
-  text_layer_set_text_alignment(sports_teams_text_layer, GTextAlignmentLeft);
-  text_layer_set_background_color(sports_teams_text_layer, GColorClear);
-  text_layer_set_text_color(sports_teams_text_layer, GColorWhite);
-  text_layer_set_font(sports_teams_text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_14));
-  layer_add_child(window_layer, text_layer_get_layer(sports_teams_text_layer));
-  layer_set_hidden((Layer*) sports_teams_text_layer, true);
+static void sports_layers_load(TextLayer *sports_team1_text_layer,TextLayer *sports_team2_text_layer, TextLayer *sports_time_text_layer, Layer *window_layer){
+  text_layer_set_text(sports_team1_text_layer, "team1");
+  text_layer_set_text_alignment(sports_team1_text_layer, GTextAlignmentLeft);
+  text_layer_set_background_color(sports_team1_text_layer, GColorClear);
+  text_layer_set_text_color(sports_team1_text_layer, GColorWhite);
+  text_layer_set_font(sports_team1_text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_14));
+  layer_add_child(window_layer, text_layer_get_layer(sports_team1_text_layer));
+  layer_set_hidden((Layer*) sports_team1_text_layer, true);
 
-  text_layer_set_text(sports_score_text_layer, "event");
-  text_layer_set_text_alignment(sports_score_text_layer, GTextAlignmentLeft);
-  text_layer_set_background_color(sports_score_text_layer, GColorClear);
-  text_layer_set_text_color(sports_score_text_layer, GColorWhite);
-  text_layer_set_font(sports_score_text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_14));
-  layer_add_child(window_layer, text_layer_get_layer(sports_score_text_layer));
-  layer_set_hidden((Layer*) sports_score_text_layer, true);
+  text_layer_set_text(sports_team2_text_layer, "team2");
+  text_layer_set_text_alignment(sports_team2_text_layer, GTextAlignmentLeft);
+  text_layer_set_background_color(sports_team2_text_layer, GColorClear);
+  text_layer_set_text_color(sports_team2_text_layer, GColorWhite);
+  text_layer_set_font(sports_team2_text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_14));
+  layer_add_child(window_layer, text_layer_get_layer(sports_team2_text_layer));
+  layer_set_hidden((Layer*) sports_team2_text_layer, true);
+
+  text_layer_set_text(sports_time_text_layer, "time");
+  text_layer_set_text_alignment(sports_time_text_layer, GTextAlignmentLeft);
+  text_layer_set_background_color(sports_time_text_layer, GColorClear);
+  text_layer_set_text_color(sports_time_text_layer, GColorWhite);
+  text_layer_set_font(sports_time_text_layer, fonts_get_system_font(FONT_KEY_GOTHIC_14));
+  layer_add_child(window_layer, text_layer_get_layer(sports_time_text_layer));
+  layer_set_hidden((Layer*) sports_time_text_layer, true);
   
 }
 
@@ -273,6 +308,7 @@ static void update_time(){
 //click handlers////////////////////////////////////////////////////////////////////////
 static void select_click_handler(ClickRecognizerRef recognizer, void *context) {
    update_weather();
+   update_sports();
    handle_battery();
 }
 
@@ -303,8 +339,9 @@ static void down_click_handler(ClickRecognizerRef recognizer, void *context) {
     layer_set_hidden((Layer*) calendar_time_text_layer, false);
   //else if the calendar is visible, show the sports scores
   }else if(!layer_get_hidden((Layer*) calendar_event_text_layer)){
-    layer_set_hidden((Layer*) sports_teams_text_layer, false);
-    layer_set_hidden((Layer*) sports_score_text_layer, false);
+    layer_set_hidden((Layer*) sports_team1_text_layer, false);
+    layer_set_hidden((Layer*) sports_team2_text_layer, false);
+    layer_set_hidden((Layer*) sports_time_text_layer, false);
     layer_set_hidden((Layer*) calendar_event_text_layer, true);
     layer_set_hidden((Layer*) calendar_location_text_layer, true);
     layer_set_hidden((Layer*) calendar_time_text_layer, true);
@@ -312,8 +349,9 @@ static void down_click_handler(ClickRecognizerRef recognizer, void *context) {
   //else, show weather again
   else{
     layer_set_hidden((Layer*) weather_text_layer, false);
-    layer_set_hidden((Layer*) sports_teams_text_layer, true);
-    layer_set_hidden((Layer*) sports_score_text_layer, true);
+    layer_set_hidden((Layer*) sports_team1_text_layer, true);
+    layer_set_hidden((Layer*) sports_team2_text_layer, true);
+    layer_set_hidden((Layer*) sports_time_text_layer, true);
   }
 
 }
@@ -375,11 +413,14 @@ static void window_load(Window *window) {
   calendar_time_text_layer = text_layer_create(GRect(0, 147, 144, 21));
   calendar_layers_load(calendar_event_text_layer, calendar_location_text_layer, calendar_time_text_layer, window_layer);
 
-  sports_teams_text_layer = text_layer_create(GRect(0, 105, 144, 21));
-  sports_score_text_layer = text_layer_create(GRect(0, 126, 144, 21));
-  //calendar_time_text_layer = text_layer_create(GRect(0, 147, 144, 21));
-  sports_layers_load(sports_teams_text_layer, sports_score_text_layer, window_layer);
+  sports_team1_text_layer = text_layer_create(GRect(0, 105, 144, 21));
+  sports_team2_text_layer = text_layer_create(GRect(0, 126, 144, 21));
+  sports_time_text_layer = text_layer_create(GRect(0, 147, 144, 21));
+  sports_layers_load(sports_team1_text_layer,sports_team2_text_layer, sports_time_text_layer, window_layer);
+
+  update_sports();
 }
+
 
 static void window_unload(Window *window) {
   app_sync_deinit(&sync);
@@ -387,8 +428,9 @@ static void window_unload(Window *window) {
   if (icon_bitmap) {
     gbitmap_destroy(icon_bitmap);
   }
-  text_layer_destroy(sports_teams_text_layer);
-  text_layer_destroy(sports_score_text_layer);
+  text_layer_destroy(sports_team1_text_layer);
+  text_layer_destroy(sports_team2_text_layer);
+  text_layer_destroy(sports_time_text_layer);
   text_layer_destroy(calendar_time_text_layer);
   text_layer_destroy(calendar_location_text_layer);
   text_layer_destroy(calendar_event_text_layer);

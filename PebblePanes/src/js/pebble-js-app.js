@@ -151,7 +151,75 @@ function sports_data(){
         if(piece[0].search("left") == -1){
           continue;
         }else{
-          console.log(piece[1]);
+          var parsed = piece[1];
+          parsed = parsed.replace("^","");
+          if(parsed.search(" at ") != -1){
+            //game hasn't started yet...
+            var split = parsed.split(" at ");
+            var team1 = split[0];
+            split = split[1];
+            split = split.split("(");
+            var team2 = split[0];
+            var time = split[1];
+            time = time.replace(")","");
+            console.log("team1: " + team1 );
+            console.log("team2: " + team2 );
+            console.log("time:  " + time  );
+            Pebble.sendAppMessage({
+              "sports_team1":team1,
+              "sports_team2":team2,
+              "sports_time":time
+            }); 
+          }else{
+            //game in progrss or is finished
+            parsed = parsed.split("(");
+            var time = parsed[1];
+            time = time.replace(")","");
+            var teamScore = parsed[0];
+            teamScore = teamScore.split(" ");
+
+            var team1,team2,score1,score2;
+            team1 = "";
+            team2 = "";
+            var first = true;
+
+            for(k = 0; k<teamScore.length; k++){
+              var tmp = parseInt(teamScore[k]);
+              if(!isNaN(tmp)){
+                if(first){
+                 team1 = team1 + " " + teamScore[k];
+                  first = false;
+                }else{
+                  team2 = team2 + " " + teamScore[k];
+                  score2 = tmp;
+                }
+              }else{
+                if(first){
+                  //console.log("add team1");
+                  team1 = team1 + " " + teamScore[k];
+                }else{
+                   //console.log("add team2");
+                  team2 = team2 + " " + teamScore[k];
+                }
+              }
+            }
+            //team1[0] = "";
+            //team2[0] = "";
+            console.log("team1:  " + team1 );
+            console.log("score1: " + score1 );
+            console.log("team2:  " + team2 );
+            console.log("score2: " + score2 );
+            console.log("time:   " + time  );
+            Pebble.sendAppMessage({
+              "sports_team1":team1,
+              "sports_team2":team2,
+              "sports_time":time
+            }); 
+
+
+
+          }
+          console.log();
         }
 
        // console.log(bit);
@@ -183,6 +251,7 @@ Pebble.addEventListener("appmessage",
     window.navigator.geolocation.getCurrentPosition(locationSuccess, locationError, locationOptions);
     console.log(e.type);
     console.log(e.payload.temperature);
+    sports_data();
     console.log("message!");
 });
 
@@ -191,12 +260,6 @@ Pebble.addEventListener("webviewclosed",
     console.log("webview closed");
     console.log(e.type);
     console.log(e.response);
-});
-
-
-Pebble.addEventListener("showConfiguration", function() {
-  console.log("showing configuration");
-  Pebble.openURL('https://dl.dropboxusercontent.com/u/8174738/configurable.html');
 });
 
 Pebble.addEventListener("webviewclosed", function(e) {
